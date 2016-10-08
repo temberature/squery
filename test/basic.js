@@ -22,9 +22,7 @@ QUnit.assert.t = function( a, b, c ) {
 
 	this.deepEqual( f, q.apply( q, c ), a + " (" + b + ")" );
 };
-QUnit.test( "hello test", function( assert ) {
-  assert.ok( 1 == "1", "Passed!" );
-});
+QUnit.module( "basic");
 if ( sQuery.ajax ) {
 QUnit.test( "ajax", function( assert ) {
 	assert.expect( 4 );
@@ -195,12 +193,12 @@ QUnit.test( "event", function( assert ) {
 		.on( "click", function() {
 			assert.ok( false, "click should not fire" );
 		} )
-		// .off( "click" )
+		.off( "click" )
 		.trigger( "click" )
-		// .on( "click", function() {
-		// 	assert.ok( true, "click should fire" );
-		// } )
-		// .trigger( "click" );
+		.on( "click", function() {
+			assert.ok( true, "click should fire" );
+		} )
+		.trigger( "click" );
 } );
 
 QUnit.test( "manipulation", function( assert ) {
@@ -238,16 +236,16 @@ QUnit.test( "manipulation", function( assert ) {
 	// );
 } );
 
-// QUnit.test( "offset", function( assert ) {
-// 	assert.expect( 3 );
+QUnit.test( "offset", function( assert ) {
+	assert.expect( 3 );
 
-// 	var parent = sQuery( "<div style='position:fixed;top:20px;'/>" ).appendTo( "#qunit-fixture" ),
-// 		elem = sQuery( "<div style='position:absolute;top:5px;'/>" ).appendTo( parent );
+	var parent = sQuery( "<div style='position:fixed;top:20px;'/>" ).appendTo( "#qunit-fixture" ),
+		elem = sQuery( "<div style='position:absolute;top:5px;'/>" ).appendTo( parent );
 
-// 	assert.strictEqual( elem.offset().top, 25, ".offset getter" );
-// 	assert.strictEqual( elem.position().top, 5, ".position getter" );
-// 	assert.strictEqual( elem.offsetParent()[ 0 ], parent[ 0 ], ".offsetParent" );
-// } );
+	assert.strictEqual( elem.offset().top, 25, ".offset getter" );
+	assert.strictEqual( elem.position().top, 5, ".position getter" );
+	assert.strictEqual( elem.offsetParent()[ 0 ], parent[ 0 ], ".offsetParent" );
+} );
 
 QUnit.test( "selector", function( assert ) {
 	assert.expect( 2 );
@@ -293,43 +291,43 @@ QUnit.test( "traversing", function( assert ) {
 	assert.strictEqual( elem.contents()[ 3 ].nodeType, 3, ".contents" );
 } );
 
-// QUnit.test( "wrap", function( assert ) {
-// 	assert.expect( 3 );
+QUnit.test( "wrap", function( assert ) {
+	assert.expect( 3 );
 
-// 	var elem = sQuery( "<div><a><b></b></a><a></a></div>" );
+	var elem = sQuery( "<div><a><b></b></a><a></a></div>" );
 
-// 	elem.find( "b" ).wrap( "<span>" );
+	elem.find( "b" ).wrap( "<span>" );
 
-// 	assert.strictEqual(
+	assert.strictEqual(
 
-// 		// Support: IE 8 only
-// 		// IE 8 prints tag names in upper case.
-// 		elem.html().toLowerCase(),
-// 		"<a><span><b></b></span></a><a></a>",
-// 		".wrap"
-// 	);
+		// Support: IE 8 only
+		// IE 8 prints tag names in upper case.
+		elem.html().toLowerCase(),
+		"<a><span><b></b></span></a><a></a>",
+		".wrap"
+	);
 
-// 	elem.find( "span" ).wrapInner( "<em>" );
+	elem.find( "span" ).wrapInner( "<em>" );
 
-// 	assert.strictEqual(
+	assert.strictEqual(
 
-// 		// Support: IE 8 only
-// 		// IE 8 prints tag names in upper case.
-// 		elem.html().toLowerCase(),
-// 		"<a><span><em><b></b></em></span></a><a></a>",
-// 		".wrapInner"
-// 	);
+		// Support: IE 8 only
+		// IE 8 prints tag names in upper case.
+		elem.html().toLowerCase(),
+		"<a><span><em><b></b></em></span></a><a></a>",
+		".wrapInner"
+	);
 
-// 	elem.find( "a" ).wrapAll( "<i>" );
+	elem.find( "a" ).wrapAll( "<i>" );
 
-// 	assert.strictEqual(
+	assert.strictEqual(
 
-// 		// Support: IE 8 only
-// 		// IE 8 prints tag names in upper case.
-// 		elem.html().toLowerCase(),
-// 		"<i><a><span><em><b></b></em></span></a><a></a></i>",
-// 		".wrapAll"
-// 	);
+		// Support: IE 8 only
+		// IE 8 prints tag names in upper case.
+		elem.html().toLowerCase(),
+		"<i><a><span><em><b></b></em></span></a><a></a></i>",
+		".wrapAll"
+	);
 
-// } );
+} );
 
