@@ -891,8 +891,8 @@ QUnit.test( "val()", function( assert ) {
 
 	assert.deepEqual( sQuery( "#select4" ).val(), [], "Call val() on multiple='multiple' select with all disabled options" );
 
-	sQuery( "#select4 optgroup" ).add( "#select4 > [disabled]" ).attr( "disabled", false );
-	assert.deepEqual( sQuery( "#select4" ).val(), [ "2", "3" ], "Call val() on multiple='multiple' select with some disabled options" );
+	jQuery( "#select4 optgroup" ).add( "#select4 > [disabled]" ).attr( "disabled", false );
+	assert.deepEqual( jQuery( "#select4" ).val(), [ "2", "3" ], "Call val() on multiple='multiple' select with some disabled options" );
 
 	sQuery( "#select4" ).attr( "disabled", true );
 	assert.deepEqual( sQuery( "#select4" ).val(), [ "2", "3" ], "Call val() on disabled multiple='multiple' select" );

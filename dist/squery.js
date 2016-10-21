@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(15),__webpack_require__(16), __webpack_require__(19), __webpack_require__(20),__webpack_require__(23)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(15),__webpack_require__(16), __webpack_require__(19), __webpack_require__(26),__webpack_require__(30), __webpack_require__(31)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
 		return window.sQuery = window._ = sQuery;
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
 
@@ -194,15 +194,7 @@
 	            var classes = this[0].getAttribute('class') || '';
 	            return classes.indexOf(value) > -1 ? true : false;
 	        },
-	        val: function(val) {
-	            if (val) {
-	                return this.each(function() {
-	                    this.value = val;
-	                });
-	            } else {
-	                return this[0].value;
-	            }
-	        },
+
 	        css: function(a, value) {
 	            var props = {};
 	            var obj = this;
@@ -258,16 +250,16 @@
 	        outerWidth: function() {
 	            return this.innerWidth() + parseInt(this.css('borderLeftWidth').replace('px', '')) + parseInt(this.css('borderRightWidth').replace('px', ''));
 	        },
-	        text: function(value) {
-	            if (value) {
-	                return this.each(function() {
-	                    this.innerText = value;
-	                    return this;
-	                });
-	            } else {
-	                return this[0].innerText;
-	            }
-	        },
+	        // text: function(value) {
+	        //     if (value) {
+	        //         return this.each(function() {
+	        //             this.innerText = value;
+	        //             return this;
+	        //         });
+	        //     } else {
+	        //         return this[0].innerText;
+	        //     }
+	        // },
 	        html: function(htmlString) {
 	            if (!htmlString) {
 	                return this[0].innerHTML;
@@ -337,11 +329,11 @@
 	            return [this[0].offsetParent];
 	        },
 
-	        clone: function() {
-	            return this.map(function(elem) {
-	                return sQuery.clone(elem);
-	            })
-	        },
+	        // clone: function() {
+	        //     return this.map(function() {
+	        //         return sQuery.clone(this);
+	        //     })
+	        // },
 	        insertBefore: function(elems) {
 	            return this.each(function() {
 	                var node = this;
@@ -1092,56 +1084,154 @@
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(17), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery, buildFragment, getAll) {
-		var
-			rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi;
-		var rscriptType = /^$|\/(?:java|ecma)script/i;
-		sQuery.extend({
-			htmlPrefilter: function(html) {
-				return html.replace(rxhtmlTag, '<$1></$2>');
-			},
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1),
+	    __webpack_require__(17),
+	    __webpack_require__(18),
+	    __webpack_require__(20),
+	    __webpack_require__(21),
+	    __webpack_require__(25)
+	], __WEBPACK_AMD_DEFINE_RESULT__ = function (sQuery, buildFragment, getAll, access, dataPriv, dataUser) {
+	    var
+	        rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi;
+	    var rscriptType = /^$|\/(?:java|ecma)script/i;
 
-		})
-		sQuery.fn.extend({
-			remove: function() {
-				return this.each(function() {
-					this.parentNode.removeChild(this);
-				})
-			},
-			append: function() {
-				var l = this.length,
-					args = arguments,
-					collection = this,
-					i = 0,
-					node, elem, scripts, hasScripts, doc;
-				if (l) {
-					fragment = buildFragment(args, collection[0].ownerDocument, false);
-					scripts = getAll(fragment.firstChild, 'script');
-					hasScripts = scripts.length;
-					for (; i < l; i++) {
-						node = fragment;
-						elem = collection[i];
-						if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
-							elem.appendChild(node);
-						}
-					}
-					if (scripts.length) {
-						doc = scripts[0].ownerDocument;
-						for (i = 0; i < hasScripts; i++) {
-							node = scripts[i];
-							if (rscriptType.test(node.type||'')) {
-								if (node.src) {
+	    function manipulationTarget(elem, content) {
+	        if (sQuery.nodeName(elem, 'table') &&
+	            sQuery.nodeName(content.nodeType !== 11 ? content : content.firstChild, 'tr')) {
+	            return elem.getElementsByName('tbody')[0] || elem;
+	        }
+	        return elem;
+	    }
 
-								} else {
-									sQuery.globalEval(node.textContent, doc);
-								}
-							}
-						}
-					}
-				}
-				return collection;
-			},
-		})
+	    function domManip(collection, args, callback, ignored) {
+	        // var fragment, first,
+	        // 	l = collection.length;
+	        // args = [].concat.apply( [], args );
+	        // // if ( sQuery.isFunction( value ) ||
+	        // // 	( l > 1 && typeof value =))
+	        // if ( l ) {
+	        // 	fragment = buildFragment( args, collection[ 0 ].ownerDocument, false, collection, ignored );
+	        // 	first = fragment.firstChild;
+	        // 	if ( fragment.childNodes.length )
+	        // }
+	    }
+
+	    function cloneCopyEvent(src, dest) {
+	        if (dest.nodeType !== 1) {
+	            return;
+	        }
+	        if (dataPriv.hasData(src)) {
+	            pdataOld = dataPriv.access(src);
+	            pdataCur = dataPriv.set(dest, pdataOld);
+	            events = pdataOld.events;
+	            if (events) {
+	                delete pdataCur.handle;
+	                pdataCur.events = {};
+	                for (type in events) {
+	                    for (i = 0, l = events[type].length; i < l; i++) {
+	                        sQuery.event.add(dest, type, events[type][i]);
+	                    }
+	                }
+	            }
+	        }
+	        if (dataUser.hasData(src)) {
+	            udataOld = dataUser.access(src);
+	            udataCur = sQuery.extend({}, udataOld);
+	            dataUser.set(dest, udataCur);
+	        }
+	    }
+
+	    sQuery.extend({
+	        htmlPrefilter: function (html) {
+	            return html.replace(rxhtmlTag, '<$1></$2>');
+	        },
+	        clone: function (elem, dataAndEvents, deepDataAndEvents) {
+	            var srcElements, destElements, i, l,
+	                clone = elem.cloneNode(true);
+	            if (dataAndEvents) {
+	                if (deepDataAndEvents) {
+	                    srcElements = srcElements || getAll(elem);
+	                    destElements = destElements || getAll(clone);
+	                    for (i = 0, l = srcElements.length; i < l; i++) {
+	                        cloneCopyEvent(srcElements[i], destElements[i]);
+	                    }
+	                } else {
+	                    cloneCopyEvent(elem, clone);
+	                }
+	            }
+	            destElements = getAll(clone, 'script');
+	            if (destElements.length > 0) {
+	                setGlobalEval(destElements, !inpage && getAll(elem, 'script'));
+	            }
+	            return clone;
+	        }
+	    })
+	    sQuery.fn.extend({
+	        remove: function () {
+	            return this.each(function () {
+	                this.parentNode.removeChild(this);
+	            })
+	        },
+	        // append: function () {
+	        //     var l = this.length,
+	        //         args = arguments,
+	        //         collection = this,
+	        //         i = 0,
+	        //         node, elem, scripts, hasScripts, doc;
+	        //     if (l) {
+	        //         fragment = buildFragment(args, collection[0].ownerDocument, false);
+	        //         scripts = getAll(fragment.firstChild, 'script');
+	        //         hasScripts = scripts.length;
+	        //         for (; i < l; i++) {
+	        //             node = fragment;
+	        //             elem = collection[i];
+	        //             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
+	        //                 elem.appendChild(node);
+	        //             }
+	        //         }
+	        //         if (scripts.length) {
+	        //             doc = scripts[0].ownerDocument;
+	        //             for (i = 0; i < hasScripts; i++) {
+	        //                 node = scripts[i];
+	        //                 if (rscriptType.test(node.type || '')) {
+	        //                     if (node.src) {
+	        //
+	        //                     } else {
+	        //                         sQuery.globalEval(node.textContent, doc);
+	        //                     }
+	        //                 }
+	        //             }
+	        //         }
+	        //     }
+	        //     return collection;
+	        // },
+	        text: function (value) {
+	            return access(this, function (value) {
+	                return value === undefined ?
+	                    jQuery.text(this) :
+	                    this.each(function () {
+	                        if (this.nodeType === 1 || this.nodeType === 11 || this.ndoeType === 9) {
+	                            this.textContent = value;
+	                        }
+	                    })
+	            }, null, value, arguments.length);
+	        },
+	        append: function () {
+	            return domManip(this, arguments, function (elem) {
+	                if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
+	                    var target = manipulationTarget(this, elem);
+	                    target.appendChild(elem);
+	                }
+	            })
+	        },
+	        clone: function (dataAndEvents, deepDataAndEvents) {
+	            dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
+	            deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
+	            return this.map( function () {
+	                return sQuery.clone( this, dataAndEvents, deepDataAndEvents );
+	            })
+	        }
+	    })
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
 
 
@@ -1149,14 +1239,174 @@
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(21), __webpack_require__(22)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function (sQuery) {
+	    "use strict"
+
+	    var access = function (elems, fn, key, value, chainable, emptyGet, raw) {
+	        var i = 0, len = elems.length, bulk = key == null;
+	        if (sQuery.type(key) === 'object') {
+	            chainable = true;
+	            for ( i in key) {
+	                access(elems, fn, i, key[i], true, emptyGet, raw);
+	            }
+	        } else if (value !== undefined ) {
+	            chainable = true;
+	            if (!sQuery.isFunction(value)) {
+	                raw = true;
+	            }
+	            if ( bulk ) {
+
+	            }
+	            if ( fn ) {
+	                for ( ; i < len; i++) {
+	                    fn( elems[i], key, raw ? value : value.call( elems[i], i, fn(elems[i], key) ) )
+	                }
+	            }
+	        }
+	        if ( chainable ) {
+	            return elems;
+	        }
+	        if ( bulk ) {
+	            return fn.call( elems );
+	        }
+	        return len ? fn( elems[0], key ) : emptyGet;
+	    }
+	    return access;
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
 
 /***/ },
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+	    __webpack_require__(22)
+	], __WEBPACK_AMD_DEFINE_RESULT__ = function (Data) {
+	    "use strict";
+
+	    return new Data();
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+	    __webpack_require__(1),
+	    __webpack_require__(23),
+	    __webpack_require__(24)
+	], __WEBPACK_AMD_DEFINE_RESULT__ = function (sQuery, rnothtmlwhite, acceptData) {
+	    "use strict";
+
+	    function Data() {
+	        this.expando = sQuery.expando + Data.uid++;
+	    }
+
+	    Data.uid = 1;
+
+	    Data.prototype = {
+	        hasData: function (owner) {
+	            var cache = owner[ this.expando ];
+	            return cache !== undefined && !sQuery.isEmptyObject( cache );
+	        },
+	        access: function (owner, key, value) {
+	            if ( key === undefined ||
+	                ( ( key && typeof key === 'string' ) && value === undefined ) ) {
+	                return this.get( owner, key );
+	            }
+	            this.set( owner, key, value );
+	            return value !== undefined ? value : key;
+	        },
+	        get: function (owner, key) {
+	            return key === undefined ?
+	                this.cache( owner ) :
+	                owner[ this.expando ] && owner[ this.expando ][ sQuery.camelCase( key ) ];
+	        },
+	        cache: function (owner) {
+	            var value = owner[ this.expando ];
+	            if ( !value ) {
+	                value = {};
+	                if ( acceptData( owner ) ) {
+	                    if ( owner.ndoeType ) {
+	                        owner[ this.expando ] = value;
+	                    } else {
+	                        Object.defineProperty( owner, this.expando, {
+	                            value: value,
+	                            configurable: true
+	                        })
+	                    }
+	                }
+	            }
+	            return value;
+	        },
+	        set: function (owner, data, value) {
+	            var prop,
+	                cache = this.cache( owner );
+	            if ( typeof data === 'string' ) {
+	                cache[ sQuery.camelCase( data ) ] = value;
+	            } else {
+	                for ( prop in data ) {
+	                    cache[ sQuery.camelCase( prop ) ] = data[ prop ];
+	                }
+	            }
+	            return cache;
+	        }
+	    }
+
+	    return Data;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
+	    "use strict";
+
+	    // Only count HTML whitespace
+	    // Other whitespace should count in values
+	    // https://html.spec.whatwg.org/multipage/infrastructure.html#space-character
+	    return ( /[^\x20\t\r\n\f]+/g );
+	}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+
+	"use strict";
+
+	return function (owner) {
+	    return owner.nodeType === 1 || owner.nodeType === 9 || !( +owner.nodeType );
+	};
+
+	}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+	    __webpack_require__(22)
+	], __WEBPACK_AMD_DEFINE_RESULT__ = function (Data) {
+	    "use strict";
+
+	    return new Data();
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(27), __webpack_require__(28), __webpack_require__(29)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery, access) {
 		sQuery.extend({
 			propFix: {
 				"tabindex": "tabIndex",
@@ -1171,17 +1421,41 @@
 				"usemap": "useMap",
 				"frameborder": "frameBorder",
 				"contenteditable": "contentEditable"			
+			},
+			propHooks: {
+
+			},
+			prop: function (elem, name, value) {
+				var nType = elem.nodeType;
+				if ( nType === 3 || nType === 8 || nType === 2) {
+					return;
+				}
+
+				name = sQuery.propFix[ name ] || name;
+				// hooks = sQuery.propHooks[ name ];
+
+				if ( value !== undefined ) {
+					return ( elem[ name ] = value );
+				}
+
+				return elem[ name ];
+			}
+		})
+		sQuery.fn.extend({
+			prop: function ( name, value ) {
+				return access( this, sQuery.prop, name, value, arguments.length > 1 );
 			}
 		})
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
 
 /***/ },
-/* 22 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery, access) {
 		sQuery.extend({
 			attr: function(elem, name, value) {
+				var ret;
 				var nType = elem.nodeType;
 				if (nType === 3 || nType === 8 || nType === 2) {
 					return;
@@ -1194,55 +1468,100 @@
 					elem.setAttribute(name, value+'');
 					
 				}
-				return sQuery.find.attr(elem, name);
+				ret =  sQuery.find.attr(elem, name);
+				return ret == null ? undefined : ret;
 			}
 		})
 		sQuery.fn.extend({
 			attr: function(name, val) {
-				var chainable = arguments.length > 1,
-					i = 0,
-					elems = this,
-					l = elems.length,
-					j;
-				if (sQuery.type(name) === 'object') {
-					chainable = true;
-					for (j in name) {
-						for(; i < l; i++) {
-							sQuery.attr(elems[i], j, name[j]);
-						}
-						
-					}
-				} else if (val !== undefined) {
-					chainable = true;
-					for (; i < l; i++) {
-						sQuery.attr(elems[i], name, val);
-					}
-				}
-				return chainable ? elems : l? sQuery.attr(elems[0], name) : null;
-
-
-				// if (val || typeof a === 'object') {
-				//     if (typeof a === 'object') {
-				//         return this.each(function() {
-				//             for (var prop in a) {
-				//                 return sQuery.attr(this, prop, a[prop]);
-				//             }
-				//         });
-				//     } else {
-				//         return this.each(function(i) {
-				//             return sQuery.attr(this, a, val, i);
-				//         });
-				//     }
-				// } else {
-				//     return this[0].getAttribute(a);
-				// }
+				return access(this, sQuery.attr, name, val, arguments.length > 1);
 			},
 		})
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
 
 
 /***/ },
-/* 23 */
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function (sQuery) {
+	    "use strict";
+
+	    sQuery.extend({
+	        valHooks: {
+	            select: {
+	                get: function (elem) {
+	                    var i, option, value,
+	                        index = elem.selectedIndex,
+	                        one = elem.type === 'select-one',
+	                        options = elem.options,
+	                        max = one ? index + 1 : options.length,
+	                        values = one ? null : [];
+
+	                    if (index < 0) {
+	                        i = max;
+	                    } else {
+	                        i = one ? index : 0;
+	                    }
+	                    for( ; i < max; i++ ) {
+	                        option = options[i];
+	                        if (  option.selected &&
+	                            !option.disabled &&
+	                            ( !option.parentNode.disabled ||
+	                                !sQuery.nodeName( option.parentNode, 'optgroup' ) )  ) {
+	                            value = sQuery( option ).val();
+	                            if ( one ) {
+	                                return value;
+	                            }
+	                            values.push( value );
+	                        }
+	                    }
+	                    return values;
+	                },
+	                set: function (elem) {
+
+	                }
+	            }
+	        }
+	    });
+	    sQuery.fn.extend({
+	        val: function (value) {
+	            var ret, elem = this[0], hooks;
+	            if ( !arguments.length ) {
+	                if (elem) {
+	                    hooks = sQuery.valHooks[elem.type] ||
+	                        sQuery.valHooks[elem.nodeName.toLowerCase()];
+	                    if (hooks &&
+	                        'get' in hooks &&
+	                        ( ret = hooks.get(elem, 'value') ) !== undefined) {
+	                        return ret;
+	                    }
+	                    ret = elem.value;
+	                    return ret == null ? '' : ret;
+	                }
+	                return;
+	            }
+
+	            return this.each(function (i) {
+	                var val;
+	                if ( this.nodeType !== 1 ) {
+	                    return;
+	                }
+	                val = sQuery.isFunction( value ) ? value.call( this, i, sQuery( this ).val() ) : value;
+	                if (hooks &&
+	                    'set' in hooks &&
+	                    ( ret = hooks.set(elem, val, 'value') ) !== undefined) {
+	                    return ret;
+	                }
+	                this.value = val;
+	            });
+
+	        },
+	    });
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+/***/ },
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function(sQuery) {
@@ -1310,6 +1629,35 @@
 		}
 
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_RESULT__ = function ( sQuery ) {
+	    "use strict";
+
+	    sQuery.extend({
+	        text: function (elem) {
+	            var node,
+	                nodeType = elem.nodeType,
+	                i = 0,
+	                ret = '';
+
+	            if ( !nodeType ) {
+	                while ( ( node = elem[ i ++ ] ) ) {
+	                    ret += sQuery.text( node );
+	                }
+	            } else if ( nodeType === 1 || nodeType  === 9 || nodeType === 11 ) {
+	                return elem.textContent;
+	            } else if ( nodeType === 3 || nodeType === 4 ) {
+	                return elem.nodeValue;
+	            }
+
+	            return ret;
+	        }
+	    })
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }
 /******/ ]);

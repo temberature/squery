@@ -140,15 +140,7 @@ define([
             var classes = this[0].getAttribute('class') || '';
             return classes.indexOf(value) > -1 ? true : false;
         },
-        val: function(val) {
-            if (val) {
-                return this.each(function() {
-                    this.value = val;
-                });
-            } else {
-                return this[0].value;
-            }
-        },
+
         css: function(a, value) {
             var props = {};
             var obj = this;
@@ -204,16 +196,16 @@ define([
         outerWidth: function() {
             return this.innerWidth() + parseInt(this.css('borderLeftWidth').replace('px', '')) + parseInt(this.css('borderRightWidth').replace('px', ''));
         },
-        text: function(value) {
-            if (value) {
-                return this.each(function() {
-                    this.innerText = value;
-                    return this;
-                });
-            } else {
-                return this[0].innerText;
-            }
-        },
+        // text: function(value) {
+        //     if (value) {
+        //         return this.each(function() {
+        //             this.innerText = value;
+        //             return this;
+        //         });
+        //     } else {
+        //         return this[0].innerText;
+        //     }
+        // },
         html: function(htmlString) {
             if (!htmlString) {
                 return this[0].innerHTML;
@@ -283,11 +275,11 @@ define([
             return [this[0].offsetParent];
         },
 
-        clone: function() {
-            return this.map(function(elem) {
-                return sQuery.clone(elem);
-            })
-        },
+        // clone: function() {
+        //     return this.map(function() {
+        //         return sQuery.clone(this);
+        //     })
+        // },
         insertBefore: function(elems) {
             return this.each(function() {
                 var node = this;
